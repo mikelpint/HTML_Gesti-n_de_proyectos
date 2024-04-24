@@ -10,6 +10,7 @@ import IconPhone from "tabler-icons/phone.tsx";
 import IconDatabase from "tabler-icons/database.tsx";
 import IconCalendarTime from "tabler-icons/calendar-time.tsx";
 import IconTrash from "tabler-icons/trash.tsx";
+import Incident from "../types/Incident.ts";
 
 const TITLE_CONTENT_CLASS =
   "flex flex-col items-center justify-items-center gap-2" as const;
@@ -22,30 +23,106 @@ export default function (
     deleteable?: boolean;
   },
 ) {
-  let { id, incident, item, insurance } = report;
+  let { incident, item, insurance } = report;
   insurance = insurance ?? {};
   incident = incident ?? {};
 
-  const { name, image } = item ?? {};
-  const { type, what, how, when, cause, cost } = incident;
+  const { name, image, desc } = item ?? {};
+  const { type, what, how, when, where, cause, cost } = incident;
+  const { id, number, coverage, phone, expiration } = insurance;
+
+  const showIncident = Object.values({ ...incident, type: undefined }).some((
+    x,
+  ) => x);
+  const showInsurance = Object.values(insurance).some((x) => x);
+
+  let labels: {
+    cause?: string;
+    cost: string;
+
+    what: string;
+    how: string;
+    when: string;
+    where?: string;
+  };
+
+  switch (type) {
+    case Incident.Type.Breakage: {
+      labels = {
+        cause: "Causa de la rotura",
+        cost: "Coste estimado de la reparación",
+        what: "Descripción de la incidencia",
+        how: "Detalles del suceso",
+        when: "Fecha y hora de la rotura",
+      };
+
+      break;
+    }
+
+    case Incident.Type.Theft: {
+      labels = {
+        cost: "Coste estimado de los bienes robados",
+        what: "Descripción de la incidencia",
+        how: "Detalles del suceso",
+        when: "Fecha y hora del robo",
+        where: "Ubicación del robo",
+      };
+
+      break;
+    }
+
+    case Incident.Type.Flood: {
+      labels = {
+        cost: "Coste estimado de los daños",
+        what: "Descripción de la incidencia",
+        how: "Detalles del suceso",
+        when: "Fecha y hora de la inundación",
+        where: "Ubicación de la inundación",
+      };
+
+      break;
+    }
+
+    case Incident.Type.Fire: {
+      labels = {
+        cost: "Coste estimado de los daños",
+        what: "Descripción de la incidencia",
+        how: "Detalles del suceso",
+        when: "Fecha y hora del incendio",
+        where: "Ubicación del incendio",
+      };
+
+      break;
+    }
+
+    default: {
+      labels = {
+        cause: "Causa",
+        cost: "Coste estimado",
+        what: "Resumen de la incidencia",
+        how: "Detalles del suceso",
+        when: "Fecha y hora",
+      };
+    }
+  }
 
   const show = useSignal(false);
 
   const details = (
     <div
       className={`w-full h-full grid ${
-        (what || how || when) &&
-          Object.values(insurance).some((x) => x)
+        showIncident &&
+          showInsurance
           ? "grid-cols-2"
           : "grid-cols-1"
       } items-baseline justify-items-center gap-6`}
     >
-      {(what || how || when) && (
+      {showIncident && (
         <div className="grid grid-cols-1 items-baseline justify-items-center gap-6">
           {what && (
             <div className={TITLE_CONTENT_CLASS}>
               <h2 className="text-lg font-medium">
-                Resumen de la incidencia
+                {labels.what}
               </h2>
 
               <p className="text-pretty break-words align-middle">
@@ -57,7 +134,7 @@ export default function (
           {how && (
             <div className={TITLE_CONTENT_CLASS}>
               <h2 className="text-lg font-medium">
-                Detalles del suceso
+                {labels.how}
               </h2>
 
               <p className="text-pretty break-words align-middle">
@@ -66,10 +143,22 @@ export default function (
             </div>
           )}
 
+          {cause && (
+            <div className={TITLE_CONTENT_CLASS}>
+              <h2 className="text-lg font-medium">
+                {labels.cause}
+              </h2>
+
+              <p className="text-pretty break-words align-middle">
+                {cause}
+              </p>
+            </div>
+          )}
+
           {when && (
             <div className={TITLE_CONTENT_CLASS}>
               <h2 className="text-lg font-medium">
-                Fecha y hora
+                {labels.when}
               </h2>
 
               <p className="text-pretty break-words align-middle">
@@ -77,10 +166,37 @@ export default function (
               </p>
             </div>
           )}
+
+          {where && (
+            <div className={TITLE_CONTENT_CLASS}>
+              <h2 className="text-lg font-medium">
+                {labels.where}
+              </h2>
+
+              <p className="text-pretty break-words align-middle">
+                {where}
+              </p>
+            </div>
+          )}
+
+          {cost !== undefined && (
+            <div className={TITLE_CONTENT_CLASS}>
+              <h2 className="text-lg font-medium">
+                {labels.cost}
+              </h2>
+
+              <p className="text-pretty break-words align-middle">
+                {cost.toLocaleString("es-ES", {
+                  style: "currency",
+                  currency: "EUR",
+                })}
+              </p>
+            </div>
+          )}
         </div>
       )}
 
-      {Object.values(insurance).some((x) => x) && (
+      {showInsurance && (
         <div className="grid grid-cols-1 items-baseline justify-items-start gap-6">
           <h2
             className={"!text-lg !font-medium " +
@@ -89,7 +205,7 @@ export default function (
             Detalles del asegurado
           </h2>
 
-          {!!insurance.number && (
+          {!!number && (
             <div className={TITLE_CONTENT_CLASS}>
               <span className="flex flex-row gap-2">
                 <IconDatabase
@@ -97,12 +213,12 @@ export default function (
                   size={24}
                 />
 
-                {`Asegurado ${insurance.number}`}
+                {`Asegurado ${number}`}
               </span>
             </div>
           )}
 
-          {!!insurance.coverage && (
+          {!!coverage && (
             <div className={TITLE_CONTENT_CLASS}>
               <span className="flex flex-row gap-2">
                 <IconCurrencyDollar
@@ -110,12 +226,12 @@ export default function (
                   size={24}
                 />
 
-                {`Cobertura ${insurance.coverage.toLocaleLowerCase("es-ES")}`}
+                {`Cobertura ${coverage.toLocaleLowerCase("es-ES")}`}
               </span>
             </div>
           )}
 
-          {!!insurance.phone && (
+          {!!phone && (
             <div className={TITLE_CONTENT_CLASS}>
               <span className="flex flex-row gap-2">
                 <IconPhone
@@ -123,12 +239,12 @@ export default function (
                   size={24}
                 />
 
-                {insurance.phone}
+                {phone}
               </span>
             </div>
           )}
 
-          {!!insurance.id && (
+          {!!id && (
             <div className={TITLE_CONTENT_CLASS}>
               <span className="flex flex-row gap-2">
                 <IconId
@@ -136,12 +252,12 @@ export default function (
                   size={24}
                 />
 
-                {insurance.id}
+                {id}
               </span>
             </div>
           )}
 
-          {!!insurance.expiration && (
+          {!!expiration && (
             <div className={TITLE_CONTENT_CLASS}>
               <span className="flex flex-row gap-2">
                 <IconCalendarTime
@@ -150,7 +266,7 @@ export default function (
                 />
 
                 {`Expira el ${
-                  new Date(insurance.expiration).toLocaleDateString("es-ES")
+                  new Date(expiration).toLocaleDateString("es-ES")
                 }`}
               </span>
             </div>
@@ -164,9 +280,25 @@ export default function (
     <Message
       extend
       banner={
-        <a target="_blank" href={image}>
-          <img class="w-96" src={image} />
-        </a>
+        <>
+          {desc && (
+            <div className="grid grid-cols-1 items-baseline justify-items-center gap-4">
+              <a target="_blank" href={image}>
+                <img class="w-96" src={image} />
+              </a>
+
+              <small class="text-sm text-pretty text-center align-middle">
+                {desc}
+              </small>
+            </div>
+          )}
+
+          {!desc && (
+            <a target="_blank" href={image}>
+              <img class="w-96" src={image} />
+            </a>
+          )}
+        </>
       }
       title={name}
       message={type}
@@ -202,9 +334,9 @@ export default function (
 
   return (
     <div className="relative w-full">
-      {goto && id && (
+      {goto && report.id && (
         <a
-          href={`/reports/${id}`}
+          href={`/reports/${report.id}`}
           target="_blank"
           className="absolute -right-2.5 -top-3 hover:animate-pulse"
         >
@@ -214,7 +346,7 @@ export default function (
 
       {main}
 
-      {deleteable && id && (
+      {deleteable && report.id && (
         <form
           className="absolute -right-2.5 -bottom-3 hover:animate-pulse"
           action="javascript:void(0);"

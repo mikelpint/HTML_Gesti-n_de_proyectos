@@ -31,7 +31,7 @@ export const handler: Handlers<{ id: string }> = {
       }
 
       const json:
-        & Exclude<Partial<Report>, "item" | "insurance" | "incident">
+        & Omit<Partial<Report>, "item" | "insurance" | "incident">
         & {
           item?: Partial<Item>;
         }
@@ -51,14 +51,15 @@ export const handler: Handlers<{ id: string }> = {
           FormDataEntryValue | number,
         ][]
       ) {
-        const [k1, k2, ..._] = k.split(
-          "_",
-        ) as (
-          | keyof Report
+        const tokens = k.split("_");
+
+        const k1 = tokens.shift() as keyof Report;
+
+        const k2 = tokens.shift() as (
           | keyof Insurance
           | keyof Item
           | keyof Incident
-        )[];
+        );
 
         if (typeof v != "string") {
           if (k == "item_image") {
@@ -76,6 +77,16 @@ export const handler: Handlers<{ id: string }> = {
           }
         }
 
+        if (!k2) {
+          json[k1] = v;
+
+          continue;
+        }
+
+        if (k1 == "id") {
+          continue;
+        }
+
         if (k == "insurance_number") {
           v = Number.parseInt(v);
         } else if (k == "incident_cost") {
@@ -86,15 +97,13 @@ export const handler: Handlers<{ id: string }> = {
           v = Date.parse(v as string);
         }
 
-        json[k1] = k2
-          ? {
-            ...(json[k1] as {
-              [K in keyof typeof json]: (typeof json)[K] extends object ? K
-                : undefined;
-            }[keyof typeof json] ?? {}),
-            [k2]: v,
-          }
-          : v;
+        json[k1] = {
+          ...(json[k1 as keyof typeof json] as {
+            [K in keyof typeof json]: (typeof json)[K] extends object ? K
+              : undefined;
+          }[keyof typeof json] ?? {}),
+          [k2]: v,
+        };
       }
 
       return await fetch(new URL(pathname, origin), {
@@ -160,7 +169,7 @@ export const handler: Handlers<{ id: string }> = {
       }
 
       {
-        let { name, image } = item ?? {};
+        let { name, image, desc } = item ?? {};
 
         if (!(typeof name == "string" && name.trim())) {
           return new Response("El objeto debe tener un nombre.", {
@@ -180,7 +189,17 @@ export const handler: Handlers<{ id: string }> = {
           });
         }
 
-        item = { name, image };
+        if (type != Incident.Type.Theft) {
+          desc = undefined;
+        }
+
+        if (typeof desc == "string" && !desc.trim()) {
+          return new Response("El objeto debe tener una descripción.", {
+            status: 400,
+          });
+        }
+
+        item = { name, image, desc };
       }
 
       {

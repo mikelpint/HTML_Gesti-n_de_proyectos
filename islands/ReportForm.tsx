@@ -213,7 +213,6 @@ export default function () {
     type: useSignal<Incident.Type | undefined>(undefined),
     cost: useSignal<string | undefined>(undefined),
     cause: useSignal<string | undefined>(undefined),
-    desc: useSignal<string | undefined>(undefined),
     what: useSignal<string | undefined>(undefined),
     how: useSignal<string | undefined>(undefined),
     where: useSignal<string | undefined>(undefined),
@@ -223,6 +222,7 @@ export default function () {
   const item = {
     name: useSignal<string | undefined>(undefined),
     image: useSignal<string | undefined>(undefined),
+    desc: useSignal<string | undefined>(undefined),
   };
 
   const insurance = {
@@ -285,7 +285,7 @@ export default function () {
       }
 
       case Incident.Type.Theft: {
-        if (!incident.desc.value?.trim()) {
+        if (!item.desc.value?.trim()) {
           return true;
         } else if (!incident.where.value?.trim()) {
           return true;
@@ -707,15 +707,21 @@ export default function () {
 
         <div
           style={{
-            "-webkit-box-sizing": "border-box",
-            "-moz-box-sizing": "border-box",
+            "-webkit-box-sizing": "box-content",
+            "-moz-box-sizing": "box-content",
           }}
-          className={`relative w-full overflow-visible grid ${
+          className={`relative min-w-full w-max overflow-visible grid ${
             incident.type.value ? "grid-cols-2" : "grid-cols-1"
-          } items-baseline justify-items-start gap-4 border-box border-2 border-slate-800 p-4 rounded-xl`}
+          } items-baseline justify-items-start gap-4 box-content border-2 border-slate-800 p-4 rounded-xl`}
         >
-          <div className="relative w-full overflow-visible grid grid-cols-1 items-center justify-items-start gap-10 border-box">
-            <div className="grid grid-cols-1 items-baseline justify-items-start gap-1.5">
+          <div
+            style={{
+              "-webkit-box-sizing": "box-content",
+              "-moz-box-sizing": "box-content",
+            }}
+            className="relative w-full flex flex-col flex-1 items-baseline justify-items-start gap-10 box-content"
+          >
+            <div className="flex flex-col flex-1 items-baseline justify-items-start gap-1.5">
               <label for="incident_when" class={LABEL_CLASS}>
                 {labels.value.when}
               </label>
@@ -768,7 +774,7 @@ export default function () {
 
           {incident.type.value &&
             (
-              <div className="w-full relative overflow-visible grid grid-cols-1 items-center justify-items-start gap-10">
+              <div className="w-full relative flex flex-col flex-1 items-baseline justify-items-start gap-10 border-box">
                 {incident.type.value == Incident.Type.Breakage && (
                   <>
                     <div className="grid grid-cols-1 items-baseline justify-items-start gap-1.5">
@@ -916,7 +922,7 @@ export default function () {
                 {incident.type.value == Incident.Type.Theft && (
                   <>
                     <div className="grid grid-cols-1 items-baseline justify-items-start gap-1.5">
-                      <label for="incident_desc" class={LABEL_CLASS}>
+                      <label for="item_desc" class={LABEL_CLASS}>
                         Descripción del objeto robado
                       </label>
 
@@ -925,11 +931,11 @@ export default function () {
                         style={TEXTAREA_STYLE}
                         class={TEXTAREA_CLASS}
                         required
-                        name="incident_desc"
+                        name="item_desc"
                         minLength={1}
-                        value={incident.desc}
+                        value={item.desc}
                         onInput={(e) =>
-                          incident.desc.value =
+                          item.desc.value =
                             (e.target as HTMLInputElement).value}
                       />
                     </div>
