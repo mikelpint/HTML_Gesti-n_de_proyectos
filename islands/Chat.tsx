@@ -13,11 +13,45 @@ export default function Chat({ init }: { init?: string }) {
   };
 
   const messages = useSignal<{ message: string; user?: boolean }[]>([]);
+  const prevMessages = useSignal(messages.value);
+
   const current = useSignal("");
 
   const notification = useSignal(!!init);
   const show = useSignal(false);
   const responding = useSignal(false);
+
+  const scroll = () => {
+    ref.chat.current?.scrollTo({
+      top: ref.chat.current.scrollHeight,
+      behavior: "smooth",
+    });
+
+    ref.chat.current?.firstElementChild?.scrollTo({
+      top: ref.chat.current.firstElementChild.scrollHeight,
+      behavior: "smooth",
+    });
+  };
+
+  effect(() => {
+    if (messages.value != prevMessages.value) {
+      prevMessages.value = messages.value;
+      setTimeout(scroll, 100);
+    }
+  });
+
+  effect(() => {
+    if (show.value || responding.value) setTimeout(scroll, 100);
+  });
+
+  effect(() => {
+    if (show.value) {
+      setTimeout(() => {
+        (document?.activeElement as HTMLElement | null)?.blur();
+        ref.input.current?.focus();
+      }, 100);
+    }
+  });
 
   const send = (
     message: string | undefined,
@@ -28,17 +62,11 @@ export default function Chat({ init }: { init?: string }) {
       return;
     }
 
-    const scroll = () => {
+    const pos = () => {
+      scroll();
       if (show.value) {
-        ref.chat.current?.scrollTo({
-          top: ref.chat.current.scrollHeight,
-          behavior: "smooth",
-        });
-
-        ref.chat.current?.firstElementChild?.scrollTo({
-          top: ref.chat.current.firstElementChild.scrollHeight,
-          behavior: "smooth",
-        });
+        (document?.activeElement as HTMLElement | null)?.blur();
+        ref.input.current?.focus();
       }
     };
 
@@ -49,7 +77,7 @@ export default function Chat({ init }: { init?: string }) {
         notification.value = true;
       }
 
-      scroll();
+      pos();
     };
 
     if (!timeout) {
@@ -57,7 +85,7 @@ export default function Chat({ init }: { init?: string }) {
     }
 
     responding.value = true;
-    scroll();
+    setTimeout(scroll, 100);
 
     setTimeout(() => {
       responding.value = false;
@@ -93,9 +121,9 @@ export default function Chat({ init }: { init?: string }) {
     const { top, x, width, height } = toggle.current.getBoundingClientRect();
 
     chat.current.style.bottom = `${
-      globalThis.innerHeight - top + height + 8
+      globalThis.innerHeight - top + height / 2
     }px`;
-    chat.current.style.right = `${globalThis.innerWidth - x - width * 1.5}px`;
+    chat.current.style.right = `${globalThis.innerWidth - x - width}px`;
   };
 
   useEffect(() => {
@@ -207,6 +235,7 @@ export default function Chat({ init }: { init?: string }) {
 
               send(current.value, true);
               (e.target as HTMLInputElement).value = "";
+              current.value = "";
 
               let timeout = Math.random() * 10;
               timeout = timeout < 0.5 ? 0.5 : timeout;

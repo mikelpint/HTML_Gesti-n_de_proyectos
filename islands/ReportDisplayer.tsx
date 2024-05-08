@@ -355,11 +355,11 @@ export default function (
             e.stopImmediatePropagation();
             e.preventDefault();
 
-            fetch(`/api/${id}`, { method: "DELETE" })
-              .then((r) => {
+            fetch(`/api/${report.id}`, { method: "DELETE" })
+              .then(async (r) => {
                 if (!r.ok) {
                   throw new Error(
-                    "No se pudo eliminar el parte: " + r.statusText,
+                    "No se pudo eliminar el parte: " + await r.text(),
                   );
                 }
 

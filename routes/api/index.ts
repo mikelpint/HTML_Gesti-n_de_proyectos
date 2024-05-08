@@ -130,7 +130,7 @@ export const handler: Handlers<{ id: string }> = {
       }
 
       let { id, incident, item, insurance } = json;
-      const { type } = incident;
+      const { type } = incident ?? {};
 
       Object.entries({ id, incident, item, insurance })
         .forEach(

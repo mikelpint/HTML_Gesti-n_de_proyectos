@@ -7,13 +7,19 @@ export const handler: Handlers = {
     const { id } = ctx.params;
 
     if (!Report.ID.Regex.test(id)) {
-      return new Response("Invalid ID.", { status: 400 });
+      return new Response("Invalid ID.", {
+        status: 400,
+        statusText: "Invalid ID.",
+      });
     }
 
     const report = DOCS.find((r) => r.id === id);
 
     if (!report) {
-      return new Response("Not found.", { status: 404 });
+      return new Response("Not found.", {
+        status: 404,
+        statusText: "Not found.",
+      });
     }
 
     return new Response(JSON.stringify(report, null, 4), {
@@ -26,13 +32,19 @@ export const handler: Handlers = {
     const { id } = ctx.params;
 
     if (!Report.ID.Regex.test(id)) {
-      return new Response("Invalid ID.", { status: 400 });
+      return new Response("Invalid ID.", {
+        status: 400,
+        statusText: "Invalid ID.",
+      });
     }
 
     const idx = DOCS.findIndex((r) => r.id === id);
 
     if (idx === -1) {
-      return new Response("Not found.", { status: 404 });
+      return new Response("Not found.", {
+        status: 404,
+        statusText: "Not found.",
+      });
     }
 
     const doc = DOCS[idx];
