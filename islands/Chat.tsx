@@ -9,7 +9,7 @@ export default function Chat({ init }: { init?: string }) {
   const ref = {
     toggle: useRef<HTMLButtonElement>(null),
     chat: useRef<HTMLDivElement>(null),
-    input: useRef<HTMLInputElement>(null),
+    input: useRef<HTMLTextAreaElement>(null),
   };
 
   const messages = useSignal<{ message: string; user?: boolean }[]>([]);
@@ -219,8 +219,16 @@ export default function Chat({ init }: { init?: string }) {
         </div>
 
         <div className="flex flex-grow flex-row px-2 gap-3">
-          <input
-            class="disabled:cursor-not-allowed"
+          <textarea
+            class="disabled:cursor-not-allowed resize-none outline-none"
+            style={{
+              "focus:-webkit-box-shadow": "none",
+              "focus:-moz-box-shadow": "none",
+            }}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellcheck={false}
             ref={ref.input}
             disabled={responding}
             required

@@ -8,6 +8,7 @@ import IconX from "tabler-icons/x.tsx";
 import Insurance from "types/Insurance.ts";
 import IconPhoto from "tabler-icons/photo.tsx";
 import { SignalLike } from "$fresh/src/types.ts";
+import { JSX } from "preact";
 
 export default function () {
   const LABEL_CLASS =
@@ -19,6 +20,13 @@ export default function () {
   const TEXTAREA_STYLE = {
     "focus:-webkit-box-shadow": "none",
     "focus:-moz-box-shadow": "none",
+  } as const;
+
+  const TEXTAREA_PROPS: JSX.HTMLAttributes<HTMLTextAreaElement> = {
+    autoComplete: "off",
+    autoCorrect: "off",
+    autoCapitalize: "off",
+    spellcheck: false,
   } as const;
 
   const TEXTAREA_CLASS = INPUT_CLASS + " resize";
@@ -404,7 +412,15 @@ export default function () {
           <button
             ref={typeRef.main}
             type="button"
-            className="px-2 py-3 flex flex-row items-center justify-items-center gap-2 bg-slate-300 text-slate-800 rounded-2xl"
+            className={computed(() =>
+              `px-2 py-3 flex flex-row items-center justify-items-center gap-2 ${
+                Object.values(Incident.Type).find((x) =>
+                    x == incident.type.value
+                  )
+                  ? "bg-slate-300 text-slate-800"
+                  : "bg-red-400 text-slate-100"
+              }  rounded-2xl`
+            )}
             onClick={() => toggled.type.value = !toggled.type.value}
           >
             <span
@@ -432,9 +448,13 @@ export default function () {
 
       <div
         ref={typeRef.options}
-        className={`${
-          toggled.type.value ? "" : "hidden "
-        }fixed px-2 py-3 flex flex-col items-center justify-items-center divide-slate-400 divide-y bg-slate-300 text-slate-800 rounded-2xl w-[${"Tipo de incidencia".length}ch]`}
+        className={computed(() =>
+          `${toggled.type.value ? "" : "hidden "}${
+            Object.values(Incident.Type).find((x) => x == incident.type.value)
+              ? "bg-slate-300 text-slate-800 divide-slate-400"
+              : "bg-red-400 text-slate-100 divide-slate-100"
+          } fixed px-2 py-3 flex flex-col items-center justify-items-center divide-y rounded-2xl w-[${"Tipo de incidencia".length}ch]`
+        )}
       >
         {Object.values(Incident.Type).map((x) => (
           <button
@@ -528,7 +548,7 @@ export default function () {
                   ref={dropZoneRef}
                   className={`${
                     item.image.value ? "hidden " : ""
-                  }flex justify-center rounded-lg border border-dashed border-red-500 px-6 py-10`}
+                  }flex justify-center rounded-lg border border-dashed border-red-600 px-6 py-10`}
                   onDragEnter={ON_DRAG_ENTER}
                   onDragLeave={ON_DRAG_LEAVE}
                   onDragOver={(e) => e.preventDefault()}
@@ -600,10 +620,9 @@ export default function () {
                   type="number"
                   name="insurance_number"
                   min={0}
-                  onInput={(e) =>
-                    insurance.number.value = parseInt(
-                      (e.target as HTMLInputElement).value,
-                    )}
+                  onInput={(e) => insurance.number.value = parseInt(
+                    (e.target as HTMLInputElement).value,
+                  )}
                 />
               </div>
 
@@ -646,7 +665,15 @@ export default function () {
               <button
                 ref={coverageRef.main}
                 type="button"
-                className="px-2 py-3 flex flex-row items-center justify-items-center gap-2 bg-slate-300 text-slate-800 rounded-2xl"
+                className={computed(() =>
+                  `${
+                    Object.values(Insurance.Coverage).find((x) =>
+                        x == insurance.coverage.value
+                      )
+                      ? "bg-slate-300 text-slate-800 divide-slate-400"
+                      : "bg-red-400 text-slate-100 divide-slate-100"
+                  } px-2 py-3 flex flex-row items-center justify-items-center gap-2 rounded-2xl`
+                )}
                 onClick={() => toggled.coverage.value = !toggled.coverage.value}
               >
                 <span
@@ -666,9 +693,15 @@ export default function () {
 
               <div
                 ref={coverageRef.options}
-                className={`${
-                  toggled.coverage.value ? "" : "hidden "
-                }fixed z-50 px-2 py-3 flex flex-col items-center justify-items-center divide-slate-400 divide-y bg-slate-300 text-slate-800 rounded-2xl w-[${"Cobertura ampliada".length}ch]`}
+                className={computed(() =>
+                  `${toggled.coverage.value ? "" : "hidden "}${
+                    Object.values(Insurance.Coverage).find((x) =>
+                        x == insurance.coverage.value
+                      )
+                      ? "bg-slate-300 text-slate-800 divide-slate-400"
+                      : "bg-red-400 text-slate-100 divide-slate-100"
+                  } fixed z-50 px-2 py-3 flex flex-col items-center justify-items-centerdivide-y rounded-2xl w-[${"Cobertura ampliada".length}ch]`
+                )}
               >
                 {Object.values(Insurance.Coverage).map((x) => (
                   <button
@@ -743,6 +776,7 @@ export default function () {
               </label>
 
               <textarea
+                {...TEXTAREA_PROPS}
                 cols={50}
                 style={TEXTAREA_STYLE}
                 class={TEXTAREA_CLASS}
@@ -760,6 +794,7 @@ export default function () {
               </label>
 
               <textarea
+                {...TEXTAREA_PROPS}
                 cols={50}
                 style={TEXTAREA_STYLE}
                 class={TEXTAREA_CLASS}
@@ -783,6 +818,7 @@ export default function () {
                       </label>
 
                       <textarea
+                        {...TEXTAREA_PROPS}
                         cols={50}
                         style={TEXTAREA_STYLE}
                         class={TEXTAREA_CLASS}
@@ -831,6 +867,7 @@ export default function () {
                       </label>
 
                       <textarea
+                        {...TEXTAREA_PROPS}
                         cols={50}
                         style={TEXTAREA_STYLE}
                         class={TEXTAREA_CLASS}
@@ -879,6 +916,7 @@ export default function () {
                       </label>
 
                       <textarea
+                        {...TEXTAREA_PROPS}
                         cols={50}
                         style={TEXTAREA_STYLE}
                         class={TEXTAREA_CLASS}
@@ -927,6 +965,7 @@ export default function () {
                       </label>
 
                       <textarea
+                        {...TEXTAREA_PROPS}
                         cols={50}
                         style={TEXTAREA_STYLE}
                         class={TEXTAREA_CLASS}
@@ -946,6 +985,7 @@ export default function () {
                       </label>
 
                       <textarea
+                        {...TEXTAREA_PROPS}
                         cols={50}
                         style={TEXTAREA_STYLE}
                         class={TEXTAREA_CLASS}

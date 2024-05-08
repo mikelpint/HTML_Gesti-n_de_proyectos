@@ -137,7 +137,7 @@ export default function (
                 {labels.how}
               </h2>
 
-              <p className="text-pretty break-words align-middle">
+              <p className="w-1/2 text-center text-pretty break-words align-middle">
                 {how}
               </p>
             </div>
